@@ -1,0 +1,344 @@
+APPPPPPPP...
+import logo from './logo.svg';
+import './App.css';
+import Dashboard from './components/Dashboard';
+import NavbarDash from './components/NavbarDash';
+import Orderdata from './components/Orderdata';
+import Register from './components/Register';
+import Login from './components/Login';
+import Cart from './components/Cart'
+import {  Route, Switch} from "react-router-dom";
+
+function App() {
+  return (
+   <div>
+      <Switch>
+        <Route path="/Dash" exact component={Dashboard} />
+        <Route path="/Dash/cart" exact component={Cart} />
+        <Route path="/orders" exact component={Orderdata} />
+        <Route path="/Reg" exact component={Register} />
+        <Route path="/" exact component={Login} />
+      </Switch>
+   </div>
+  );
+}
+
+export default App;
+
+
+
+Register....
+import React, { Component } from 'react'
+
+import axios from 'axios'
+import { Link, Redirect, useHistory } from 'react-router-dom';
+
+const regForName = RegExp(/^[A-Za-z]/);
+const regForEve = RegExp(/^(?!^ +$)^.+$/);
+const regForEmail = RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+const regForMobile = RegExp(/^[0-9]{10}$/);
+
+
+export class Register extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            prodata: [], fname: '', mobile: '', email: '', password: '', confirm_password: '', errors: {
+                fname: '',
+                mobile: '',
+                email: '',
+                password: '',
+                confirm_password: ''
+
+
+
+            }, err: {
+                fname: '',
+                mobile: '',
+                email: '',
+                password: '',
+                confirm_password: ''
+
+
+
+            }
+        }
+    }
+
+    handle = (event) => {
+        const { name, value } = event.target
+
+        let errors = this.state.errors;
+        let err = this.state.err;
+        switch (name) {
+            case 'fname':
+                errors.fname = regForName.test(value) ? '' : 'Enter Valid first Name';
+                if (errors.fname !== "") { err.fname = "error" }
+                else { err.fname = "" }
+                break;
+
+            case 'mobile':
+                errors.mobile = regForMobile.test(value) ? '' : 'Enter Valid Mobile Number';
+                if (errors.mobile !== "") { err.mobile = "error" }
+                else { err.mobile = "" }
+                break;
+            case 'email':
+                errors.email = regForEmail.test(value) ? '' : 'Enter Valid Email';
+                if (errors.email !== "") { err.email = "error" }
+                else { err.email = "" }
+                break;
+            case 'password':
+                errors.password = regForEve.test(value) ? '' : 'Enter Password';
+                if (errors.password !== "") { err.password = "error" }
+                else { err.password = "" }
+                break;
+            case 'confirm_password':
+                errors.confirm_password = this.state.password === value ? '' : "Password and Confirm Password does not match"
+                if (errors.confirm_password !== "") { err.confirm_password = "error" }
+                else { err.fname = "" }
+                break;
+
+        }
+        this.setState({ err, errors, [name]: value }, () => {
+            console.log(errors)
+        })
+    }
+    formSubmit = (event) => {
+        event.preventDefault();
+
+        if (this.validate(this.state.errors)) {
+            if (this.state.email !== "" && this.state.password !== "" && this.state.fname !== "" && this.state.lname !== "" && this.state.username !== "") {
+                alert("Details added successfully !!")
+                this.add()
+            }
+            else {
+                alert("Failed to Register")
+            }
+
+
+        }
+        else {
+            alert("Please Enter Valid Details");
+        }
+    }
+    validate = (errors) => {
+        let valid = true;
+        Object.values(errors).forEach((val) => val.length > 0 && (valid = false));
+        return valid;
+    }
+    add = (event) => {
+
+
+        const URL = "http://localhost:8000/api/adduser"
+        axios.post(URL, {
+            name: this.state.fname,
+            mobile: this.state.mobile,
+            email: this.state.email,
+            password: this.state.password
+
+        })
+            .catch(err => { console.log(err) })
+
+    }
+
+    render() {
+        const { errors } = this.state;
+        return (
+            <div style={{ marginLeft: "0px", marginTop: "0px",backgroundImage:`url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdo3Yt96brcBFc_iw1vby8rvm-ROM1dSreA&usqp=CAU")`,height:"713px",width:"1536px"}}  >
+                <br/>
+                <h1 className="text-secondary" style={{paddingLeft:"500px",fontSize:"15mm"}}>Registration</h1>
+                <div  >
+                    <div className="col-md-6 mx-auto">
+                        <br/>
+                        <form onSubmit={this.formSubmit} method="post">
+                            <label></label>
+                            <input type="text" name="fname" placeholder="Name" className="form-control" onChange={this.handle} />
+                            {errors.fname.length > 0 &&
+                                <span style={{ color: 'red' }}>{errors.fname}</span>}<br />
+
+                            <label></label>
+                            <input type="text" name="mobile" placeholder="Mobile Number" className="form-control" onChange={this.handle} />
+                            {errors.mobile.length > 0 &&
+                                <span style={{ color: 'red' }}>{errors.mobile}</span>}<br />
+                            <label></label>
+                            <input type="text" name="email" placeholder="Email Address" className="form-control" onChange={this.handle} />
+                            {errors.email.length > 0 &&
+                                <span style={{ color: 'red' }}>{errors.email}</span>}<br />
+                            <label></label>
+                            <input type="password" name="password" placeholder="Password" className="form-control" onChange={this.handle} />
+                            {errors.password.length > 0 &&
+                                <span style={{ color: 'red' }}>{errors.password}</span>}<br />
+                            <label></label>
+                            <input type="password" name="confirm_password" placeholder="Confirm Password" className="form-control" onChange={this.handle} />
+                            {errors.confirm_password.length > 0 &&
+                                <span style={{ color: 'red' }}>{errors.confirm_password}</span>}<br />
+
+                            <input type="submit" value="Submit" className="btn btn-success " style={{marginLeft:"250px"}}   />
+                            <br /><br /><br />
+                            <p className="text-center">If Registered, Go to <Link to="/">Login Page</Link></p>
+
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        )
+    }
+}
+
+export default Register
+
+
+Login....
+import React,{useState} from 'react'
+import { login } from '../config/MyService'
+import { useHistory } from 'react-router'
+import { Link } from 'react-router-dom'
+import Footer from './Footer';
+export default function Login() {
+    const [state,setState]=useState({email:'',password:'',name:'',age:''});
+    const handler=(event)=>{
+        const {name,value}=event.target;
+        setState({...state,[name]:value})
+    }
+    const History = useHistory();
+    const postRegis=(event)=>{
+        event.preventDefault();
+        login(state)
+        .then(res=>{
+            console.log(res.data.msg)
+            if(res.data.err==0){
+               localStorage.setItem("_token",res.data.token);
+               localStorage.setItem("userdetails",state.email);
+               History.push("/Dash")
+            }
+            if(res.data.err==1){
+                console.log(res.data)
+            }
+        })
+    }
+    return (
+        <>
+        <div style={{backgroundImage:`url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdo3Yt96brcBFc_iw1vby8rvm-ROM1dSreA&usqp=CAU")`,height:"657px", width:"1536px"}}>
+            <br/><br/>
+            <div className="container  col-5" style={{background:"rgb(134, 190, 101)",height:"380px",marginTop:"50px"}}>
+            <h1 style={{marginTop:"50px", marginLeft:"200px"}}>Login</h1>
+            <br/><br/>
+            <form method="post" onSubmit={postRegis}>
+                <div className="form-group">
+                    <h5> EMAIL</h5>
+                    <input type="email" name="email" placeholder="Email" className="form-control" onChange={handler}/>
+                </div><br/><br/>
+                <div className="form-group">
+                    <h5> PASSWORD</h5>
+                    <input type="password" name="password" placeholder="Password" className="form-control" onChange={handler}/>
+                </div><br/><br/>
+                <div className="text-center">
+                <input type="submit" value="LOGIN" className="btn btn-dark text-center"/></div>
+            </form><br/><br/>
+            <p className="text-center">If Not Registered, <Link to="/Reg">Register Here</Link></p>
+            </div>
+            
+        </div>
+        
+        <Footer/>
+        </>
+        
+    )
+}
+
+
+
+Dashboard...Dashboard
+import React, { useEffect, useState } from 'react'
+import { getPosts } from '../config/MyService'
+import { connect } from "react-redux";
+import jwt_decode from 'jwt-decode';
+import Footer from './Footer';
+import { useSelector, useDispatch } from "react-redux";
+import NavbarDash from './NavbarDash';
+
+function Dashboard(props) {
+  const [postdata, setPostdata] = useState([])
+  const [uid,setUid]=useState('')
+  const cart = useSelector((state) => state.cartItems);
+  console.log(cart);
+  const dispatch = useDispatch();
+ 
+  useEffect(()=>{
+      
+    if(localStorage.getItem('_token')!=undefined){
+        let token=localStorage.getItem('_token');
+        let decode=jwt_decode(token);
+        console.log(decode)
+        setUid(decode.uid)
+        getPosts()
+        .then(res=>{
+            console.log(res.data);
+            if(res.data.err==0){
+                setPostdata(res.data.data);
+            }
+        })
+    }
+ },[])
+  console.log(postdata)
+  return (
+    <>
+    <div style={{backgroundImage:`url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMdo3Yt96brcBFc_iw1vby8rvm-ROM1dSreA&usqp=CAU")`,marginTop:"0px",height:"900px"}}>
+    <NavbarDash/>
+    <div className="container" >
+      {/* {postdata[0].name} */}
+     <h2 className="text-light bg-dark" >Welcome : {uid}</h2>
+      <div className=" row">
+        {postdata.map((val, index) =>
+          <div className=" container col-md-4">
+            <div className="card" >
+              <img src={val.image} className="card-img-top" alt="..." height="200px" />
+              <div className="card-body">
+                <h5 className="card-title">{val.name}</h5>
+                <p className="card-text">Price:${val.price}</p>
+                <a className="btn btn-dark" onClick={() =>
+                  props.cart(
+                    val._id,
+                    val.image,
+                    val.name,
+                    val.price
+                  )
+                }>Add to cart</a>
+              </div>
+            </div>
+          </div>)}
+
+      </div>
+          
+    </div>
+    </div>
+    <Footer/>
+    </>
+  )
+}
+const mapStateToProps = (state) => {
+  return {
+    mycounter: state.count,
+  };
+};
+
+const mapDispatchTopProps = (dispatch) => {
+  return {
+    cart: function (_id, image, name, price) {
+      dispatch({
+        type: "CART",
+        payload: {
+          id: _id,
+          image: image,
+          name: name,
+          price: price
+        },
+      });
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchTopProps)(Dashboard);
